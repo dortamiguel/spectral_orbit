@@ -1,0 +1,469 @@
+<!--
+██████   ██████   ██████   ██████   ██       ██   ██████   ██████   ██
+██       ██  ██     ██     ██       ██       ██     ██     ██  ██   ██
+██████   ██  ██     ██     ████     ██       ██     ██     ██  ██   ██
+    ██   ██  ██     ██     ██       ██       ██     ██     ██  ██   ██
+██████   ██  ██     ██     ██████   ██████   ██     ██     ██  ██   ██████
+-->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Satelital</title>
+        <meta name="theme-color" content="#000000" />
+        <meta name="description" content="A rule-discovery puzzle game where you place alien symbols on a grid. Uncover their logic as you journey through an atmospheric solar system.">
+        <meta property="og:description" content="A rule-discovery puzzle game where you place alien symbols on a grid. Uncover their logic as you journey through an atmospheric solar system.">
+        <meta property="og:image" content="https://spectralorbit.com/assets/satelital_main_capsule.jpg">
+        <meta property="og:title" content="Satelital">
+        <meta property="og:url" content="https://spectralorbit.com/satelital">
+        <meta property="og:type" content="website">
+        <link rel="canonical" href="https://spectralorbit.com/satelital">
+        <link rel="icon" type="image/png" href="/assets/satelital_icon.png" />
+        <link rel="preload" href="/assets/source_code_pro_regular.ttf" as="font" type="font/ttf" crossorigin>
+        <link rel="preload" as="image" href="/assets/nebula.webp" type="image/png">
+        <link rel="preload" as="image" href="/assets/satelital_logo.png" type="image/png">
+        <script>
+            function update() {
+                var width = Math.max(600, Math.min(1080, innerWidth));
+                document.body.style.backgroundSize = (140 + (1080 - width) / 2) + "% auto, auto";
+            }
+
+            addEventListener("DOMContentLoaded", function() {
+                update();
+                var video = document.getElementsByClassName("video")[0];
+                video.onload = function() {
+                    video.classList.add("loaded");
+                };
+            });
+
+            addEventListener("resize", update);
+
+            var nebula = new Image();
+            nebula.onload = function() {
+                document.body.classList.add("loaded");
+            };
+            nebula.src = "/assets/nebula.webp";
+        </script>
+        <style>
+            @font-face {
+                font-family: "source_code_pro";
+                src: url("/assets/source_code_pro_regular.ttf") format("truetype");
+            }
+
+            :root {
+                --size-xs: 4px;
+                --size-s: 9px;
+                --size-m: 18px;
+                --size-l: 36px;
+                --content-width: 650px;
+                --light-color: #fafeff;
+                --alt-color: #95a5a6;
+                --dark-color: #000000;
+                --warn-color: #f4a955;
+                --accent-color: #4ed0ff;
+
+                font-family: "source_code_pro", monospace;
+                line-height: 1.5;
+                font-weight: 400;
+                font-size: 18px;
+                color-scheme: dark;
+                color: var(--light-color);
+                background-color: var(--dark-color);
+                font-synthesis: none;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            *, *::before, *::after {
+                box-sizing: border-box;
+                -webkit-user-drag: none;
+            }
+
+            html {
+                background: black;
+                height: 100%;
+            }
+
+            body {
+                background: black;
+                width: 100%;
+                min-height: 100%;
+                line-height: 1.5;
+                margin: 0;
+                text-shadow: 0 2px 8px black;
+                position: relative;
+                z-index: 0;
+            }
+
+            body::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                z-index: -1;
+                background: url("/assets/nebula.webp") no-repeat center -20px;
+                background-size: cover;
+                opacity: 0;
+                transition: opacity 3s ease;
+            }
+
+            body.loaded::before {
+                opacity: 1;
+            }
+
+            a {
+                text-decoration: none;
+                color: inherit;
+            }
+
+            a:hover {
+                box-shadow: 0 2px 0 0 var(--light-color);
+            }
+
+            img {
+                object-fit: contain;
+            }
+
+            iframe {
+                z-index: 1;
+                background: black;
+            }
+
+            #info iframe, #info img {
+                filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .5));
+            }
+
+            .container {
+                width: 100%;
+                max-width: var(--content-width);
+                padding: var(--size-m) var(--size-m) 0 var(--size-m);
+                margin-bottom: var(--size-m);
+                z-index: 1;
+            }
+
+            p {
+                margin: 0 0 var(--size-m) 0;
+            }
+
+            li {
+                color: var(--accent-color);
+                list-style-position: inside;
+            }
+
+            ul {
+                margin: 0 0 var(--size-m) var(--size-m);
+                padding: 0;
+            }
+
+            .center {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .title {
+                color: var(--warn-color);
+            }
+
+            .video-container {
+                width: 100%;
+                max-width: var(--content-width);
+                aspect-ratio: 16 / 9;
+                margin-bottom: var(--size-m);
+                border-radius: 4px;
+                background: rgba(0,0,0,.2);
+                overflow: hidden;
+            }
+
+            .video {
+                width: 100%;
+                max-width: var(--content-width);
+                height: auto;
+                aspect-ratio: 16 / 9;
+                display: block;
+                margin-bottom: var(--size-m);
+                border-radius: 4px;
+                border: 2px solid rgba(255,255,255,.05);
+                opacity: 0;
+                transition: opacity 1s ease;
+            }
+
+            .video.loaded {
+                opacity: 1;
+            }
+
+            .header {
+                width: 100%;
+                overflow: hidden;
+                font-size: 24px;
+                user-select: none;
+                color: #ffffff;
+            }
+
+            .steam {
+                margin-top: var(--size-m);
+                padding: var(--size-s) var(--size-m);
+                user-select: none;
+            }
+
+            .steam img {
+                width: 200px;
+            }
+
+            .steam:hover {
+                box-shadow: none;
+                filter: invert(100%);
+            }
+
+            #info {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: var(--size-m);
+            }
+
+            #social {
+                padding: var(--size-m);
+                display: flex;
+                width: 100%;
+                flex-wrap: wrap;
+            }
+
+            .social {
+                margin: var(--size-m);
+                display: flex;
+                align-items: center;
+            }
+
+            .social svg {
+                width: 25px;
+                margin-right: var(--size-s);
+            }
+
+            .youtube {
+                color: #ff0033;
+            }
+
+            .youtube:hover {
+                box-shadow: 0 2px 0 0 #ff0033;
+            }
+
+            .twitter {
+                color: #1d9bf0;
+            }
+
+            .twitter:hover {
+                box-shadow: 0 2px 0 0 #1d9bf0;
+            }
+
+            .bluesky {
+                color: #0085ff;
+            }
+
+            .bluesky:hover {
+                box-shadow: 0 2px 0 0 #0085ff;
+            }
+
+            .discord {
+                color: #5865f2;
+            }
+
+            .discord:hover {
+                box-shadow: 0 2px 0 0 #5865f2;
+            }
+
+            .email {
+                color: #ffffff;
+            }
+
+            .email:hover {
+                box-shadow: 0 2px 0 0 var(--light-color);
+            }
+
+            .warn {
+                color: var(--warn-color);
+            }
+
+            .accent {
+                color: var(--accent-color);
+            }
+
+            a.warn:hover  {
+                box-shadow: 0 2px 0 0 var(--warn-color);
+            }
+
+            #screenshots {
+                content-visibility: auto;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                padding: 0px var(--size-m);
+            }
+
+            #screenshots a {
+                width: 31%;
+                margin: 4px 8px;
+                aspect-ratio: 16 / 9;
+                display: block;
+            }
+
+            #screenshots a:hover {
+                box-shadow: none !important;
+            }
+
+            #screenshots img {
+                width: 100%;
+                height: 100%;
+                aspect-ratio: 16 / 9;
+                object-fit: cover;
+                border: 2px solid rgba(255,255,255,.05);
+                border-radius: 4px;
+            }
+
+            @media (max-width: 850px) {
+                #screenshots a {
+                    width: 100%;
+                }
+            }
+
+            #footer {
+                width: 100%;
+                height: 100px;
+                align-items: end;
+                padding: var(--size-m);
+                font-size: 14px;
+            }
+
+            .home {
+                margin: var(--size-m) 0px;
+                font-size: 20px;
+            }
+
+            .copyright {
+                font-size: 14px;
+                color: var(--alt-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header center">
+            <img style="width:450px;max-width:80vw;margin:40px 0px 10px 0px" alt="Satelital" src="/assets/satelital_logo.png">
+        </div>
+        <div id="info">
+            <div class="video-container">
+                <iframe
+                    loading="low"
+                    class="video"
+                    src="https://www.youtube.com/embed/WqfCKVuHTpM"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen
+                ></iframe>
+            </div>
+            <a class="steam" target="_blank" rel="noopener noreferrer" href="https://store.steampowered.com/app/3256790/Satelital/">
+                <img alt="Wishlist on Steam" src="/assets/wishlist_on_steam.png">
+            </a>
+        </div>
+        <div id="social" class="center">
+            <a class="social youtube" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/@spectral_orbit">
+                <svg viewBox="0 0 68 48">
+                    <path fill="#ff1919" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" />
+                    <path fill="#ffffff" d="M 45,24 27,14 27,34" />
+                </svg>
+                <span>YouTube</span>
+            </a>
+            <a class="social twitter" target="_blank" rel="noopener noreferrer" href="https://twitter.com/migue_dorta">
+                <svg viewBox="0 0 248 204">
+                    <path fill="#1d9bf0" d="M221.95 51.29c.15 2.17.15 4.34.15 6.53 0 66.73-50.8 143.69-143.69 143.69v-.04c-27.44.04-54.31-7.82-77.41-22.64 3.99.48 8 .72 12.02.73 22.74.02 44.83-7.61 62.72-21.66-21.61-.41-40.56-14.5-47.18-35.07 7.57 1.46 15.37 1.16 22.8-.87-23.56-4.76-40.51-25.46-40.51-49.5v-.64c7.02 3.91 14.88 6.08 22.92 6.32C11.58 63.31 4.74 33.79 18.14 10.71c25.64 31.55 63.47 50.73 104.08 52.76-4.07-17.54 1.49-35.92 14.61-48.25 20.34-19.12 52.33-18.14 71.45 2.19 11.31-2.23 22.15-6.38 32.07-12.26-3.77 11.69-11.66 21.62-22.2 27.93 10.01-1.18 19.79-3.86 29-7.95-6.78 10.16-15.32 19.01-25.2 26.16z"/>
+                </svg>
+                <span>Twitter</span>
+            </a>
+            <a class="social bluesky" target="_blank" rel="noopener noreferrer" href="https://bsky.app/profile/miguedorta.bsky.social">
+                <svg fill="none" viewBox="0 0 64 57" width="30" style="width: 26px; height: 26px;">
+                    <path fill="#0085ff" d="M13.873 3.805C21.21 9.332 29.103 20.537 32 26.55v15.882c0-.338-.13.044-.41.867-1.512 4.456-7.418 21.847-20.923 7.944-7.111-7.32-3.819-14.64 9.125-16.85-7.405 1.264-15.73-.825-18.014-9.015C1.12 23.022 0 8.51 0 6.55 0-3.268 8.579-.182 13.873 3.805ZM50.127 3.805C42.79 9.332 34.897 20.537 32 26.55v15.882c0-.338.13.044.41.867 1.512 4.456 7.418 21.847 20.923 7.944 7.111-7.32 3.819-14.64-9.125-16.85 7.405 1.264 15.73-.825 18.014-9.015C62.88 23.022 64 8.51 64 6.55c0-9.818-8.578-6.732-13.873-2.745Z"/>
+                </svg>
+                <span>Bluesky</span>
+            </a>
+            <a class="social discord" target="_blank" rel="noopener noreferrer" href="https://discord.gg/ChuNWuj3Z2">
+                <svg viewBox="0 -28.5 256 256">
+                    <path fill="#5865F2" d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" />
+                </svg>
+                <span>Discord</span>
+            </a>
+            <a class="social email" target="_blank" rel="noopener noreferrer" href="mailto:miguel@spectralorbit.com">
+                <svg viewBox="0 0 512 512" fill="#ffffff">
+                    <path d="M502.025,76.385L306.731,262.778L504.09,433.112c4.958-7.159,7.91-15.821,7.91-25.173V104.058 C512,93.537,508.169,83.997,502.025,76.385z"/>
+                    <path d="M223.684,256.925l6.801,6.323c14.319,13.329,36.727,13.32,51.021,0.009L488.849,65.36 c-6.315-3.473-13.466-5.623-21.171-5.623H44.322c-9.199,0-17.749,2.825-24.841,7.637l204.16,189.525 C223.65,256.908,223.667,256.916,223.684,256.925z" />
+                    <path d="M7.467,79.501C2.765,86.541,0,94.981,0,104.06v303.88c0,8.823,2.662,17.007,7.117,23.919l197.922-168.951L7.467,79.501z" />
+                    <path d="M293.284,275.615l-0.068,0.06l-0.009,0.009l-0.077,0.068c-13.013,12.117-30.643,16.666-47.13,13.619 c-1.084-0.196-2.116-0.632-3.191-0.896c-2.176-0.538-4.378-1.015-6.485-1.826c-3.132-1.203-6.17-2.705-9.071-4.506 c-0.026-0.017-0.051-0.026-0.077-0.034c-2.927-1.818-5.709-3.942-8.32-6.366l-1.229-1.143L18.963,444.191 c7.194,5.052,15.915,8.073,25.361,8.073h423.347c8.909,0,17.169-2.688,24.124-7.228L294.342,274.634L293.284,275.615z"/>
+                </svg>
+                <span>Email</span>
+            </a>
+        </div>
+        <div id="description" class="center">
+            <div class="container">
+                <p><span style="color:var(--accent-color)">Satelital</span> is a rule-discovery game about solving alien puzzles through observation and experimentation.</p>
+                <p>Travel between six celestial bodies, each featuring a unique set of rules. Place symbols on a grid and study their interactions to learn how they work. Each puzzle introduces a new idea and expands on what you've learned before, without lengthy tutorials or explicit explanations.</p>
+                <p>Listen to a calm ambient soundscape as you explore the cosmos at your own pace.</p>
+                <p><a class="warn" target="_blank" rel="noopener noreferrer" href="https://drive.google.com/drive/folders/1JItktNf9yuFrC72lR-fTfo0iEQVDV0tg">Press Kit</a></p>
+            </div>
+        </div>
+        <div id="screenshots">
+            <a href="/assets/screenshots/trium_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/trium_1.jpg" /></a>
+            <a href="/assets/screenshots/trium_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/trium_2.jpg" /></a>
+            <a href="/assets/screenshots/trium_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/trium_3.jpg" /></a>
+            <a href="/assets/screenshots/ludis_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/ludis_1.jpg" /></a>
+            <a href="/assets/screenshots/ludis_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/ludis_2.jpg" /></a>
+            <a href="/assets/screenshots/ludis_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/ludis_3.jpg" /></a>
+            <a href="/assets/screenshots/nexus_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/nexus_1.jpg" /></a>
+            <a href="/assets/screenshots/nexus_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/nexus_2.jpg" /></a>
+            <a href="/assets/screenshots/nexus_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/nexus_3.jpg" /></a>
+            <a href="/assets/screenshots/lunae_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/lunae_1.jpg" /></a>
+            <a href="/assets/screenshots/lunae_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/lunae_2.jpg" /></a>
+            <a href="/assets/screenshots/lunae_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/lunae_3.jpg" /></a>
+            <a href="/assets/screenshots/motus_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/motus_1.jpg" /></a>
+            <a href="/assets/screenshots/motus_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/motus_2.jpg" /></a>
+            <a href="/assets/screenshots/motus_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/motus_3.jpg" /></a>
+            <a href="/assets/screenshots/solis_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/solis_1.jpg" /></a>
+            <a href="/assets/screenshots/solis_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/solis_2.jpg" /></a>
+            <a href="/assets/screenshots/solis_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/solis_3.jpg" /></a>
+            <a href="/assets/screenshots/space_1.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/space_1.jpg" /></a>
+            <a href="/assets/screenshots/space_2.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/space_2.jpg" /></a>
+            <a href="/assets/screenshots/space_3.png" target="_blank" rel="noopener noreferrer"><img loading="low" decoding="async" src="/assets/screenshots/space_3.jpg" /></a>
+        </div>
+        <div id="features" class="center">
+            <div class="container">
+                <h1>Features</h1>
+                <li>Open Exploration</li>
+                <ul>1 moon, 1 star and 4 planets that can be visited in any order</ul>
+                <li>Over 120 Handcrafted Puzzles</li>
+                <ul>Each bringing a new idea that builds on the last</ul>
+                <li>4-6 Hours</li>
+                <ul>A compact puzzle journey that respects your time</ul>
+                <li>Original  Soundtrack</li>
+                <ul>Atmospheric ambient music for concentration</ul>
+            </div>
+        </div>
+        <div class="center">
+            <a href="/" class="warn home">Home</a>
+        </div>
+        <div id="footer" class="center">
+            <span class="copyright">© Copyright Miguel Dorta</span>
+        </div>
+        <script>
+            const copyright = document.getElementsByClassName("copyright")[0];
+            if (copyright) {
+                copyright.textContent = copyright.textContent.replace("Copyright", `Copyright ${new Date().getFullYear()}`);
+            }
+        </script>
+    </body>
+</html>
