@@ -110,6 +110,10 @@
                 color: inherit;
             }
 
+            img {
+                object-fit: contain;
+            }
+
             a:hover {
                 box-shadow: 0 2px 0 0 var(--light-color);
             }
@@ -143,9 +147,10 @@
                 box-shadow: 0 2px 0 0 var(--warn-color);
             }
 
-            .logo {
-                width: 401px;
+            #header img {
                 height: 163px;
+                width: 401px;
+                max-width: 80vw;
                 margin: var(--size-xl) 0px var(--size-m) 0;
                 filter: drop-shadow(0 2px 8px rgba(0, 0, 0, .5));
                 user-select: none;
@@ -231,9 +236,13 @@
         </style>
     </head>
     <body>
-        <div id="about" class="center">
+        <div id="header" class="center">
             <div class="container">
                 <img fetchpriority="high" class="logo" src="/assets/spectral_orbit_logo.png" alt="Spectral Orbit"/>
+            </div>
+        </div>
+        <div id="about" class="center">
+            <div class="container">
                 <p style="color: #9da1ff">Indie game studio based in Tokyo, Japan.</p>
             </div>
         </div>
