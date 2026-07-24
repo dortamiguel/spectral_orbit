@@ -212,6 +212,7 @@
 
             .steam img {
                 width: 200px;
+                height: 67px;
             }
 
             .steam:hover {
@@ -328,8 +329,18 @@
             }
 
             @media (max-width: 850px) {
+                #screenshots {
+                    padding: 0;
+                }
+
+                #screenshots img {
+                    border: 0;
+                    border-radius: 0;
+                }
+
                 #screenshots a {
                     width: 100%;
+                    margin: 4px 0px;
                 }
             }
 
@@ -354,7 +365,7 @@
     </head>
     <body>
         <div class="header center">
-            <img style="width:450px;max-width:80vw;margin:40px 0px 10px 0px" alt="Satelital" src="/assets/satelital_logo.png">
+            <img style="width:450pxh;max-width:80vw;height:120px;margin:40px 0px 10px 0px" alt="Satelital" src="/assets/satelital_logo.png">
         </div>
         <div id="info">
             <div class="video-container">
