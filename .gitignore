@@ -1,0 +1,11 @@
+# macos
+.DS_Store
+.Spotlight-V100
+.Trashes
+._*
+
+# windows
+Thumbs.db
+desktop.ini
+
+/.vscode
