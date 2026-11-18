@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>How I made a custom game engine for Satelital</title>
+        <meta name="theme-color" content="#3a4451" />
+        <meta name="author" content="Miguel Dorta" />
+        <meta name="description" content="For quite a long time, I've been working on a puzzle game called Satelital, a rule-discovery game about learning alien logic.">
+        <meta property="og:site_name" content="Spectral Orbit" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content="How I made a custom game engine for Satelital" />
+        <meta property="og:description" content="For quite a long time, I've been working on a puzzle game called Satelital, a rule-discovery game about learning alien logic.">
+        <meta property="og:url" content="https://spectralorbit.com/blog/satelital_game_engine" />
+        <meta property="og:image" content="https://spectralorbit.com/assets/screenshots/trium_2.jpg" />
+        <meta property="og:image:alt" content="How I made a custom game engine for Satelital" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="How I made a custom game engine for Satelital" />
+        <meta name="twitter:description" content="For quite a long time, I've been working on a puzzle game called Satelital, a rule-discovery game about learning alien logic." />
+        <meta name="twitter:image" content="https://spectralorbit.com/assets/screenshots/trium_2.jpg" />
+        <link rel="canonical" href="https://spectralorbit.com/blog/satelital_game_engine" />
+        <link rel="alternate" type="application/rss+xml" title="Satelital Blog" href="/rss.xml" />
+        <link rel="icon" type="image/png" href="/assets/icon.png" />
+        <link rel="preload" href="/assets/source_code_pro_regular.ttf" as="font" type="font/ttf" crossorigin>
+        <style>
+            @font-face {
+                font-family: "source_code_pro";
+                src: url("/assets/source_code_pro_regular.ttf") format("truetype");
+            }
+
+            :root {
+                --size-xs: 4px;
+                --size-s: 9px;
+                --size-m: 18px;
+                --size-l: 36px;
+                --content-width: 720px;
+                --light-color: #f5f5f3;
+                --alt-color: #c3c8cd;
+                --dark-color: #2e333c;
+                --warn-color: #f8b96e;
+                --accent-color: #a5dcf5;
+                --reading-font: Verdana, system-ui, Helvetica, sans-serif;
+
+                font-family: "source_code_pro", monospace;
+                line-height: 1.65;
+                font-weight: 400;
+                font-size: 20px;
+                color-scheme: dark;
+                color: var(--light-color);
+                background-color: var(--dark-color);
+                font-synthesis: none;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            *, *::before, *::after {
+                box-sizing: border-box;
+                -webkit-user-drag: none;
+            }
+
+            html {
+                background: var(--dark-color);
+                height: 100%;
+            }
+
+            body {
+                background: url("/assets/background.webp") center top / 100% 1000px no-repeat, var(--dark-color);
+                width: 100%;
+                min-height: 100%;
+                margin: 0;
+            }
+
+            a {
+                text-decoration: none;
+                color: inherit;
+                text-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            }
+
+            a:hover {
+                box-shadow: 0 2px 0 0 var(--light-color);
+            }
+
+            img {
+                object-fit: contain;
+                pointer-events: none;
+            }
+
+            .container {
+                width: 100%;
+                max-width: var(--content-width);
+                padding: var(--size-m) var(--size-m) 0 var(--size-m);
+                margin-bottom: var(--size-m);
+                z-index: 1;
+            }
+
+            p {
+                margin: 0 0 1.6em 0;
+            }
+
+            p, figcaption {
+                font-family: var(--reading-font);
+                font-size: 18px;
+                line-height: 1.75;
+            }
+
+            h1 {
+                font-size: 32px;
+                font-weight: 400;
+                line-height: 1.3;
+                margin: 0 0 var(--size-m) 0;
+            }
+
+            code {
+                font-family: "source_code_pro", monospace;
+                font-size: 1em;
+                color: var(--light-color);
+                background: #353c48;
+                border: 1px solid rgba(255, 255, 255, .1);
+                border-radius: 6px;
+                padding: 1px 6px;
+                text-shadow: none;
+            }
+
+            .center {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .title {
+                color: var(--warn-color);
+            }
+
+            .warn {
+                color: var(--warn-color);
+            }
+
+            a.warn, .title a {
+                text-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+            }
+
+            a.warn:hover {
+                box-shadow: 0 2px 0 0 var(--warn-color);
+            }
+
+            .date {
+                display: block;
+                font-size: 17px;
+                color: var(--alt-color);
+                margin-bottom: var(--size-s);
+            }
+
+            article a {
+                color: var(--accent-color);
+            }
+
+            article a:hover {
+                box-shadow: 0 2px 0 0 var(--accent-color);
+            }
+
+            figure {
+                margin: var(--size-l) 0;
+            }
+
+            figure img {
+                display: block;
+                width: 100%;
+                height: auto;
+                border-radius: 4px;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+            }
+
+            figure a {
+                display: block;
+            }
+
+            figure video {
+                display: block;
+                width: 100%;
+                height: auto;
+                border-radius: 4px;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+                background: rgba(0, 0, 0, .2);
+            }
+
+            figure a:hover {
+                box-shadow: none;
+            }
+
+            .video {
+                aspect-ratio: 16 / 9;
+                margin: 52px 0;
+                border-radius: 4px;
+                overflow: hidden;
+                background: rgba(0, 0, 0, .2);
+                box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+            }
+
+            .video iframe {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: 0;
+            }
+
+            .steam {
+                margin: var(--size-l) 0;
+            }
+
+            .steam iframe {
+                display: block;
+                width: 100%;
+                height: 190px;
+                border: 0;
+                background: transparent;
+                color-scheme: normal;
+            }
+
+            figcaption {
+                margin-top: var(--size-s);
+                text-align: center;
+                font-size: 16px;
+                color: var(--alt-color);
+            }
+
+            .articles {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .articles li {
+                margin-bottom: calc(2 * var(--size-l));
+            }
+
+            .articles li:last-child {
+                margin-bottom: 0;
+            }
+
+            .page-header {
+                display: flex;
+                justify-content: center;
+            }
+
+            .page-header .container {
+                padding-top: 48px;
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+
+            .page-header .date {
+                color: #d6dadd;
+            }
+
+            .page-header h1 {
+                margin-bottom: 0;
+            }
+
+            .page-header h1 a:hover {
+                box-shadow: none;
+                text-decoration: underline;
+                text-decoration-thickness: 2px;
+                text-underline-offset: 6px;
+            }
+
+            .page-header .blog-heading {
+                font-size: 40px;
+                margin-bottom: var(--size-l);
+            }
+
+            .content {
+                padding-top: 24px;
+            }
+
+            .article-title {
+                display: inline-block;
+                font-size: 32px;
+                line-height: 1.3;
+                margin-bottom: var(--size-m);
+            }
+
+            a.article-title:hover {
+                box-shadow: none;
+                text-decoration: underline;
+                text-decoration-thickness: 2px;
+                text-underline-offset: 5px;
+            }
+
+            .articles p {
+                margin-bottom: var(--size-s);
+            }
+
+            .read-more {
+                color: var(--accent-color);
+            }
+
+            a.read-more:hover {
+                box-shadow: 0 2px 0 0 var(--accent-color);
+            }
+
+            @media (max-width: 850px) {
+                figure, body .video {
+                    margin-left: calc(-1 * var(--size-m));
+                    margin-right: calc(-1 * var(--size-m));
+                }
+
+                body .video {
+                    border-radius: 0;
+                }
+
+                figure img, figure video {
+                    border: 0;
+                    border-radius: 0;
+                }
+
+                figcaption {
+                    padding: 0 var(--size-m);
+                }
+
+                body .links {
+                    gap: 34px;
+                    font-size: 20px;
+                }
+            }
+
+            #social {
+                width: 100%;
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                max-width: calc(6 * 32px + 5 * 46px);
+                padding: 0px var(--size-m);
+                margin-inline: auto;
+                margin-top: var(--size-l);
+            }
+
+            .social {
+                display: flex;
+                align-items: center;
+                flex-shrink: 0;
+                color: #dcdfe2;
+            }
+
+            .social:hover {
+                box-shadow: none;
+                color: var(--light-color);
+            }
+
+            .social svg path {
+                fill: currentColor;
+            }
+
+            .social.youtube svg path:last-child {
+                fill: var(--dark-color);
+            }
+
+            .social svg {
+                width: 32px;
+                height: 32px;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .18));
+            }
+
+            .links {
+                gap: 52px;
+                margin: calc(2 * var(--size-l)) 0px 0px 0px;
+                font-size: 22px;
+            }
+
+            .links.top-links {
+                margin-top: 0;
+                padding-top: 22px;
+            }
+
+            .links a.warn {
+                color: var(--light-color);
+                text-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            }
+
+            .links a.warn:hover {
+                box-shadow: 0 2px 0 0 var(--light-color);
+            }
+
+            .top-links + .page-header .container {
+                padding-top: 56px;
+            }
+
+            #footer {
+                width: 100%;
+                padding: var(--size-l) var(--size-m) calc(1.5 * var(--size-l)) var(--size-m);
+                font-size: 14px;
+            }
+
+            .copyright {
+                font-size: 14px;
+                color: var(--alt-color);
+                text-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="center links top-links">
+<a href="/" class="warn">Home</a>
+<a href="/satelital" class="warn">Satelital</a>
+<a href="/blog.html" class="warn">Blog</a>
+<a href="/rss.xml" class="warn">RSS</a>
+</nav>
+<header class="page-header">
+<div class="container">
+<span class="date">18-11-2026</span>
+<h1 class="title"><a href="/blog/satelital_game_engine">How I made a custom game engine for Satelital</a></h1>
+</div>
+</header>
+<div class="center">
+<div class="container content">
+<article>
+<figure><a target="_blank" rel="noopener noreferrer" href="/assets/screenshots/trium_2.png"><img loading="lazy" src="/assets/screenshots/trium_2.jpg" alt=""></a><figcaption></figcaption></figure>
+<p>For quite a long time, I've been working on a puzzle game called Satelital, a rule-discovery game about learning alien logic.</p>
+<p>As a solo developer, I decided to start this project from scratch. My motivation was to learn the actual fundamentals behind the technology of videogames. This meant I had to build most of the tools I would need myself, including the game engine, renderer, puzzles, editors, UX, design, art and music.</p>
+<p>Now that I've finally managed to release the game, I think it's a good moment to share how I built it.</p>
+<div class="video"><iframe loading="lazy" src="https://www.youtube.com/embed/yfdbzUFkba0" title="YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+<p>The main reason I got into programming was the idea of eventually working on games. I spent many years working on web and building mobile apps. It was fun, but I felt like I wasn't going in the direction I really wanted to.</p>
+<p>So one day, after listening to every Jonathan Blow talk I could find and playing too much The Witness, I decided to finally give it a try.</p>
+<p>I spent many days and countless hours looking for the best tool I could use to make a game, but nothing left me satisfied. The closest I got to having fun with gamedev was with the <a target="_blank" rel="noopener noreferrer" href="https://love2d.org/">LÖVE framework</a> making a few jam games. But even with that, it felt quite limiting to not really know what was happening behind the graphics I somehow managed to animate on my screen.</p>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/love_2d_grid.jpg"><img loading="lazy" src="/blog/assets/love_2d_grid.jpg" alt="Early prototype of a tile-based level editor built with LÖVE and Lua."></a><figcaption>Early prototype of a tile-based level editor built with LÖVE and Lua.</figcaption></figure>
+<p>I remember hearing about shaders and parallel programming. The concept always felt very arcane and mysterious to me, but now writing them is the thing I enjoy the most while coding.</p>
+<p>I finally decided to jump into the swimming pool and actually learn C&#8288;+&#8288;+. I had to learn how to manage memory and how not to shoot myself in the foot with the wrong tools. I started using SDL2 while trying to use the C&#8288;+&#8288;+ standard library as little as possible.</p>
+<p>Before getting too deep into the engine, I actually finished a prototype of the game quite early. It had very early versions of four kinds of puzzles that mostly survived until the final game. It was made entirely with SDL2, but I soon realised that if I wanted to have more interesting graphics, I would need to use shaders and decided to switch to OpenGL.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/satelital_prototype.mp4#t=0.001"></video><figcaption>Early prototype gameplay with SDL2</figcaption></figure>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/satelital_nexus_puzzle.mp4#t=0.001"></video><figcaption>This puzzle was the first one I made, also the only one that survived until the end</figcaption></figure>
+<p>With the help of <a target="_blank" rel="noopener noreferrer" href="https://learnopengl.com/">LearnOpenGL</a> I quickly had a triangle on the screen. From there, learning things like lighting, tonemapping, normal maps, shader effects and everything else opened up a whole new way of looking at computers for me. Before, my idea of how a computer actually draws to the screen was quite naive. When I started learning graphics I just wanted to be able to manually change the color of each pixel individually, but in the end the idea of running a program in parallel for every pixel clicked for me.</p>
+<p>One thing that made a huge difference while working on shaders was having code reloading. Before that, I had a complex system that stored constant values in config files, which would later get passed through uniforms into shaders. Then a custom development menu would provide some UI to tweak those values at runtime. With that I stopped having to reload and compile everything for every little change I wanted to make.</p>
+<p>It worked, but having to maintain all this extra scaffolding was slowing me down. Another unexpected downside of this setup was that, in some cases, the shader compiler couldn't optimize the code as well as it otherwise could, since knowing constant values ahead of time helps it make better decisions.</p>
+<p>Having shader reloading made a huge difference. Being able to change some code, save the file and immediately see the result on screen was very useful. Iterating on shaders became much faster and more fun. This was probably my biggest regret about not having it from day one.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/shader_reload.mp4#t=0.001"></video><figcaption>Color modification preview using shader hot reloading</figcaption></figure>
+<p>For a big part of the development I was using SDL2, mainly to create a window, read input and get a surface to draw on. But it felt wrong to depend on a library that was several times bigger than my entire game just to handle a few seemingly simple tasks. I decided to drop that dependency and make my own platform layer that I could understand and maintain. I wouldn't have to wait for someone else to fix a bug anymore because now I could just change it myself. It wasn't that hard to end up with a single file with a few thousand lines of code that supported both macOS and Windows. I'm now looking forward to working on mobile and console ports, it feels like it might be a fun thing to work on.</p>
+<p>At some point during development, compile times were getting longer, so I decided to look into what was going on. I checked where all that time was going, and to my surprise a lot of it was spent compiling standard library things. Stuff like <code>std::function</code> was particularly slow for example.</p>
+<p>Eventually I realised that I wasn't actually forced to use the standard library just because it was there, and the subset I needed wasn't that hard to implement myself. It took me a month to replace it with my own base library, but it was so worth it. Not only did compile times get faster, but I also learned how a lot of things I had always taken for granted in other languages actually worked.</p>
+<p>At some point I started looking into Vulkan because I wanted HDR. I couldn't get it working on macOS through OpenGL and I was worried about OpenGL being deprecated in the future. Also I didn't really want to build the whole engine around an API that might become deprecated.</p>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/alpha_blending.jpg"><img loading="lazy" src="/blog/assets/alpha_blending.jpg" alt="Testing alpha blending with my first vulkan triangles"></a><figcaption>Testing alpha blending with my first vulkan triangles</figcaption></figure>
+<p>Moving to Vulkan was rough at the beginning. There was so much boilerplate to type and understand. Also, when I started working on the engine, there wasn't much documentation around how to implement a good backend with it. In hindsight, I feel that even though I got a lot of valuable things from tutorials and books, most of them were overcomplicating something that could be much more straightforward. I still have nightmares about trying to resize a window...</p>
+<p>Getting Vulkan working on macOS was actually surprisingly easy thanks to MoltenVK. It was nice not having to learn Metal and being able to keep the same codebase on Windows. The engine started out only working on macOS, so I was afraid I'd run into a lot of issues when porting it to Windows. But I was quite nice to see Vulkan just working the same day I tried it.</p>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/vulkan_bug.jpg"><img loading="lazy" src="/blog/assets/vulkan_bug.jpg" alt="Funny looking bug I got doing the Vulkan port"></a><figcaption>Funny looking bug I got doing the Vulkan port</figcaption></figure>
+<p>My philosophy from day one was to only grow the engine towards exactly what I needed. This was a long solo project, so trying to build a general purpose engine first, without knowing what I needed, would probably have meant never finishing the game. I did waste time on things I thought I would need, but I cut them when I knew I wouldn't be using them. Because I was also learning C/C&#8288;+&#8288;+ along the way, I made many coding mistakes but I wasn't afraid of big refactors. Cleaning the codebase helped me bring up my morale.</p>
+<p>From the beginning I wanted to avoid making a 3D engine since I knew that might complicate things too much. But after I finished the prototype, I kept learning about shader techniques and effects. So in the end, my goal was to get as close as possible to a 3D look without actually having to load any 3D polygons.</p>
+<p>To do this, I chose an orthographic top-down view so I could just prerender the assets in Blender and then load their albedo, normal and height maps as textures. Having a fixed camera meant I could render all the assets from exactly the same perspective, so they would always fit together properly in the game. Other things that needed to be animated were drawn in the pixel shader using SDFs. The terrain of the planets was too big to be stored entirely in textures, so in most cases I had to procedurally generate them in shaders too.</p>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/lunae_final_frame.png"><img loading="lazy" src="/blog/assets/lunae_final_frame.jpg" alt="Final frame"></a><figcaption>Final frame</figcaption></figure>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/lunae_albedo.png"><img loading="lazy" src="/blog/assets/lunae_albedo.jpg" alt="Albedo"></a><figcaption>Albedo</figcaption></figure>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/lunae_normals.png"><img loading="lazy" src="/blog/assets/lunae_normals.jpg" alt="Normals"></a><figcaption>Normals</figcaption></figure>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/lunae_light_and_shadows.png"><img loading="lazy" src="/blog/assets/lunae_light_and_shadows.jpg" alt="Light &amp; Shadows"></a><figcaption>Light &amp; Shadows</figcaption></figure>
+<p>Since I wanted a 3D look with dynamic lighting, I also needed dynamic shadows. The final approach I settled on was ray marching. With the height map of each prop, I could make them look as if they were actually sitting in a 3D space, even though everything was still rendered in 2D. In the shader I basically march along the direction of the light and sample the height map to figure out where a shadow should be drawn.</p>
+<p>Having the height map was also useful for other things. For example, I could use that information to make objects interact with the water in a convincing way. Objects can actually submerge in the ocean instead of looking like flat images drawn on top of it. This is also how the waves can interact with the shore around an island.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/terrain_height_demo.mp4#t=0.001"></video><figcaption>Moving a tree into the ocean</figcaption></figure>
+<p>The engine was only one part of making a complete game. I also had to build a custom level editor. I wanted to make it as easy as possible to design and iterate on puzzles, so I integrated an edit mode that allowed me to change puzzles and the enviroment at runtime and see the changes in real time.</p>
+<p>It was quite fun to quickly draw and tweak puzzles directly in the game. It helped me discover so many ideas. After making thousands of puzzles, you start to develop a sense of beauty about how a puzzle should be. Having this editor allowed me to get into the zone. I could spend hours making puzzles without actually thinking about the tool I was using.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/puzzle_editor_demo.mp4#t=0.001"></video><figcaption>Puzzle level editor</figcaption></figure>
+<p>Alongside the in-game editor I made a custom Blender plugin that could load my level config files into Blender. The game had a file watcher that could detect changes in the baked textures of the 3D models rendered by Blender. But it could also load level data and provide another way to edit. The upside was being able to just use Blender tools like multi-select, but aside from that, it wasn't actually that useful. It was cool to make though, and it's an interesting demo. But just being able to edit things in-game was much better, since you can see how it will actually look in the end. Though having said that, looking at the levels in an actual 3D environment feels quite nice.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/blender_level_editor.mp4#t=0.001"></video><figcaption>Environmental level editor with a custom Blender plugin</figcaption></figure>
+<p>Building the game with all these custom tools brought some issues. They worked on my machine, but when I started playtesting I began to find lots of bugs that were tricky to reproduce. The hardest ones were related to graphics, due to differences in hardware and drivers on machines I didn't have access to. Tools like Vulkan validation layers were quite useful, though they didn't catch everything.</p>
+<p>Another thing that was tricky to deal with was shader compatibility. When using GLSL, if you rely heavily on making visual effects with noise related functions, you will find issues with things like <code>sin</code> or <code>pow</code> because the specification doesn't guarantee their precision. So I had to be constantly checking that everything looked the same on as many different hardware configurations as I could find. For a while, I didn't notice that the distribution pattern of my stars looked different across vendors. It looked correct, but I wanted to have the same placement of stars wherever you played to make it feel more like an actual place.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/parallax_stars.mp4#t=0.001"></video><figcaption>Early concept of parallax for stars</figcaption></figure>
+<p>Having good logs to see how the internals of the game were working ended up being very useful. It was essential for me to have them after I released the demo and started getting feedback from users who were seeing errors I couldn't reproduce. Many of them reported a black screen when trying to open the game for the first time, and these were caused by many different kinds of problems. Sometimes it would be a missing extension, sometimes a third party Vulkan layer injecting code that prevented the frame from being drawn, or some other particular driver issue. Without the logs showing the exact point when the error happened, it would have been almost impossible to fix these bugs without having the actual hardware.</p>
+<p>The logs ended up being quite useful for performance. For example, when trying to do optimizations for Intel GPUs, I noticed that some of the biggest shaders were being compiled in a non-optimal way. I basically ran the whole game in just 2 big shaders, one to blend the scene with all the quads, and another pass where I do lighting, shadows and effects like water, where the final normal and height map of the scene are presented. Because these shaders were so big, they couldn't be compiled for SIMD16.</p>
+<p>These integrated Intel GPUs are quite common on laptops, and they can shade 16 pixels at once, but only if everything in the shader fits in a small amount of very fast memory. Because my shaders grew so much and I wasn't even aware that this would be an actual issue, the driver was quietly falling back to shading 8 pixels at a time, making the game run noticeably slower. Once I had this information in the logs, I could see what I needed to trim down. I reduced the number of values I needed to keep around as much as possible, while also avoiding duplicated code caused by things like macros until everything fit again.</p>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/menu_graphics.png"><img loading="lazy" src="/blog/assets/menu_graphics.jpg" alt="Menu graphics options"></a><figcaption>Menu graphics options</figcaption></figure>
+<p>During development I was always careful about how demanding the game was, but after switching to a faster computer I started paying less attention to it. It's quite easy to just settle for something that looks good enough and move on to the next thing when you're busy. That's why I started targeting the Steam Deck and aiming for stable 90 FPS. It helped me keep performance in sight and avoid things that would make the game too slow on low-powered platforms.</p>
+<p>I feel like I threw away a lot of work during development because the art and design of the game changed several times. In hindsight, I think it was good to keep the mentality of avoiding things that would make the game slow and keeping an eye on the performance stats. But it was only towards the end of the game that I could simply focus on performance without worrying about optimizing things in a way that would make them hard to generalize or reuse in the future, since the game was finished.</p>
+<p>In the end I actually added a performance mode that tones down a few special effects, but I think it was a good decision to do that when the game was finished. Otherwise, you suddenly need to be testing and tweaking more than one version of the game while making changes and adding new things.</p>
+<p>A frame limiter was something else I added to help slower laptops maintain a stable framerate. This also brought the necessity of adding an option to draw the cursor in hardware. For the whole development I was drawing the cursor within the game in software, and that meant some lag was unavoidable. Many users complained about this when the demo was released.</p>
+<p>This happens when you use Vsync because the last frame you're seeing is actually buffered, so the frame is already behind the input. The OS has a special mode for drawing the cursor that prevents these issues, but then you lose the ability to apply effects to it, like fluid animations or doing some lighting around it. Being aware of this also helped me focus on reducing the input lag of the game as much as possible. When running the game with the frame limiter, you notice immediately that the cursor becomes super laggy. For that case, having a hardware cursor was necessary.</p>
+<figure><video controls playsinline preload="metadata" width="1280" height="720" style="aspect-ratio: 1280 / 720" src="/blog/assets/level_selection_proof_of_concept.mp4#t=0.001"></video><figcaption>Proof of concept for the level selection view</figcaption></figure>
+<p>Looking back on all these details, being able to change basic engine things like that is super hard, or almost impossible, with closed engines. I worked with Unity before, doing some ports, and the mentality there was that you had to follow a set of &quot;good practices&quot; and deal with whatever was decided for you, even though the hardware in most cases could do better. It was very rough and slow at the beginning when making a custom engine, but the freedom you get at the end of development is very satisfying.</p>
+<p>I feel lucky I got the chance to take this long road and actually make it to the end. I stumbled into something really interesting, and had so many moments of realization while working on this project that I lost count.</p>
+<p>After all these years, I'm quite happy now to have found the perfect excuse to actually study the things I love the most to work on.</p>
+<p>If you enjoyed this article, consider giving Satelital a try. The game is available on Steam, with a free demo available.</p>
+<div class="steam"><iframe loading="lazy" src="https://store.steampowered.com/widget/3256790/" title="Steam store page" frameborder="0"></iframe></div>
+<figure><a target="_blank" rel="noopener noreferrer" href="/blog/assets/motus.png"><img loading="lazy" src="/blog/assets/motus.jpg" alt=""></a><figcaption></figcaption></figure>
+</article>
+</div>
+</div>
+        <div class="center links">
+            <a href="/" class="warn">Home</a>
+<a href="/satelital" class="warn">Satelital</a>
+<a href="/blog.html" class="warn">Blog</a>
+<a href="/rss.xml" class="warn">RSS</a>
+
+        </div>
+        <div id="social" class="center">
+            <a class="social youtube" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/@spectral_orbit">
+                <svg viewBox="0 0 68 48">
+                    <path fill="#e83030" d="M66.52,7.74c-0.78-2.93-2.49-5.41-5.42-6.19C55.79,.13,34,0,34,0S12.21,.13,6.9,1.55 C3.97,2.33,2.27,4.81,1.48,7.74C0.06,13.05,0,24,0,24s0.06,10.95,1.48,16.26c0.78,2.93,2.49,5.41,5.42,6.19 C12.21,47.87,34,48,34,48s21.79-0.13,27.1-1.55c2.93-0.78,4.64-3.26,5.42-6.19C67.94,34.95,68,24,68,24S67.94,13.05,66.52,7.74z" />
+                    <path fill="#ffffff" d="M 45,24 27,14 27,34" />
+                </svg>
+            </a>
+            <a class="social twitter" target="_blank" rel="noopener noreferrer" href="https://twitter.com/migue_dorta">
+                <svg viewBox="0 0 248 204">
+                    <path fill="#1d9bf0" d="M221.95 51.29c.15 2.17.15 4.34.15 6.53 0 66.73-50.8 143.69-143.69 143.69v-.04c-27.44.04-54.31-7.82-77.41-22.64 3.99.48 8 .72 12.02.73 22.74.02 44.83-7.61 62.72-21.66-21.61-.41-40.56-14.5-47.18-35.07 7.57 1.46 15.37 1.16 22.8-.87-23.56-4.76-40.51-25.46-40.51-49.5v-.64c7.02 3.91 14.88 6.08 22.92 6.32C11.58 63.31 4.74 33.79 18.14 10.71c25.64 31.55 63.47 50.73 104.08 52.76-4.07-17.54 1.49-35.92 14.61-48.25 20.34-19.12 52.33-18.14 71.45 2.19 11.31-2.23 22.15-6.38 32.07-12.26-3.77 11.69-11.66 21.62-22.2 27.93 10.01-1.18 19.79-3.86 29-7.95-6.78 10.16-15.32 19.01-25.2 26.16z"/>
+                </svg>
+            </a>
+            <a class="social bluesky" target="_blank" rel="noopener noreferrer" href="https://bsky.app/profile/miguedorta.bsky.social">
+                <svg fill="none" viewBox="0 0 64 57">
+                    <path fill="#0085ff" d="M13.873 3.805C21.21 9.332 29.103 20.537 32 26.55v15.882c0-.338-.13.044-.41.867-1.512 4.456-7.418 21.847-20.923 7.944-7.111-7.32-3.819-14.64 9.125-16.85-7.405 1.264-15.73-.825-18.014-9.015C1.12 23.022 0 8.51 0 6.55 0-3.268 8.579-.182 13.873 3.805ZM50.127 3.805C42.79 9.332 34.897 20.537 32 26.55v15.882c0-.338.13.044.41.867 1.512 4.456 7.418 21.847 20.923 7.944 7.111-7.32 3.819-14.64-9.125-16.85 7.405 1.264 15.73-.825 18.014-9.015C62.88 23.022 64 8.51 64 6.55c0-9.818-8.578-6.732-13.873-2.745Z"/>
+                </svg>
+            </a>
+            <a class="social discord" target="_blank" rel="noopener noreferrer" href="https://discord.gg/ChuNWuj3Z2">
+                <svg viewBox="0 -28.5 256 256">
+                    <path fill="#5865F2" d="M216.856339,16.5966031 C200.285002,8.84328665 182.566144,3.2084988 164.041564,0 C161.766523,4.11318106 159.108624,9.64549908 157.276099,14.0464379 C137.583995,11.0849896 118.072967,11.0849896 98.7430163,14.0464379 C96.9108417,9.64549908 94.1925838,4.11318106 91.8971895,0 C73.3526068,3.2084988 55.6133949,8.86399117 39.0420583,16.6376612 C5.61752293,67.146514 -3.4433191,116.400813 1.08711069,164.955721 C23.2560196,181.510915 44.7403634,191.567697 65.8621325,198.148576 C71.0772151,190.971126 75.7283628,183.341335 79.7352139,175.300261 C72.104019,172.400575 64.7949724,168.822202 57.8887866,164.667963 C59.7209612,163.310589 61.5131304,161.891452 63.2445898,160.431257 C105.36741,180.133187 151.134928,180.133187 192.754523,160.431257 C194.506336,161.891452 196.298154,163.310589 198.110326,164.667963 C191.183787,168.842556 183.854737,172.420929 176.223542,175.320965 C180.230393,183.341335 184.861538,190.991831 190.096624,198.16893 C211.238746,191.588051 232.743023,181.531619 254.911949,164.955721 C260.227747,108.668201 245.831087,59.8662432 216.856339,16.5966031 Z M85.4738752,135.09489 C72.8290281,135.09489 62.4592217,123.290155 62.4592217,108.914901 C62.4592217,94.5396472 72.607595,82.7145587 85.4738752,82.7145587 C98.3405064,82.7145587 108.709962,94.5189427 108.488529,108.914901 C108.508531,123.290155 98.3405064,135.09489 85.4738752,135.09489 Z M170.525237,135.09489 C157.88039,135.09489 147.510584,123.290155 147.510584,108.914901 C147.510584,94.5396472 157.658606,82.7145587 170.525237,82.7145587 C183.391518,82.7145587 193.761324,94.5189427 193.539891,108.914901 C193.539891,123.290155 183.391518,135.09489 170.525237,135.09489 Z" />
+                </svg>
+            </a>
+            <a class="social email" target="_blank" rel="noopener noreferrer" href="mailto:miguel@spectralorbit.com">
+                <svg viewBox="0 0 512 512" fill="#e7e7e7">
+                    <path d="M502.025,76.385L306.731,262.778L504.09,433.112c4.958-7.159,7.91-15.821,7.91-25.173V104.058 C512,93.537,508.169,83.997,502.025,76.385z"/>
+                    <path d="M223.684,256.925l6.801,6.323c14.319,13.329,36.727,13.32,51.021,0.009L488.849,65.36 c-6.315-3.473-13.466-5.623-21.171-5.623H44.322c-9.199,0-17.749,2.825-24.841,7.637l204.16,189.525 C223.65,256.908,223.667,256.916,223.684,256.925z" />
+                    <path d="M7.467,79.501C2.765,86.541,0,94.981,0,104.06v303.88c0,8.823,2.662,17.007,7.117,23.919l197.922-168.951L7.467,79.501z" />
+                    <path d="M293.284,275.615l-0.068,0.06l-0.009,0.009l-0.077,0.068c-13.013,12.117-30.643,16.666-47.13,13.619 c-1.084-0.196-2.116-0.632-3.191-0.896c-2.176-0.538-4.378-1.015-6.485-1.826c-3.132-1.203-6.17-2.705-9.071-4.506 c-0.026-0.017-0.051-0.026-0.077-0.034c-2.927-1.818-5.709-3.942-8.32-6.366l-1.229-1.143L18.963,444.191 c7.194,5.052,15.915,8.073,25.361,8.073h423.347c8.909,0,17.169-2.688,24.124-7.228L294.342,274.634L293.284,275.615z"/>
+                </svg>
+            </a>
+        </div>
+        <div id="footer" class="center">
+            <span class="copyright">© Copyright Miguel Dorta</span>
+        </div>
+        <script>
+            const copyright = document.getElementsByClassName("copyright")[0];
+            if (copyright) {
+                copyright.textContent = copyright.textContent.replace("Copyright", `Copyright ${new Date().getFullYear()}`);
+            }
+        </script>
+    </body>
+</html>
